@@ -1,43 +1,47 @@
-pub struct FixedSizeArrayPool<T> {
-    cached_buffers: Vec<Vec<T>>,
-    segment_size: usize,
-    max_array_count: usize,
+pub struct FixedSizeArrayPool<T, const SS: usize, const PS: usize> {
+    cached_buffers: Vec<[T; SS]>,
 }
-impl<T> FixedSizeArrayPool<T> {
+
+pub enum Response {
+    Ok,
+    PoolSaturated,
+}
+
+impl<T, const SS: usize, const PS: usize> FixedSizeArrayPool<T, SS, PS> {
     pub fn len(&self) -> usize {
         self.cached_buffers.len()
     }
-    pub fn new(segment_size: usize, max_array_count: usize) -> FixedSizeArrayPool<T>
+    pub fn new() -> FixedSizeArrayPool<T, SS, PS>
     where
         T: Clone,
+        T: Copy,
         T: Default,
     {
+        let temp = [T::default(); SS];
         FixedSizeArrayPool {
-            cached_buffers: vec![vec![T::default(); segment_size]; max_array_count],
-            segment_size: segment_size,
-            max_array_count: max_array_count,
+            cached_buffers: vec![temp.clone(); PS],
         }
     }
 
-    pub fn acquire(&mut self) -> Vec<T>
+    pub fn acquire(&mut self) -> [T; SS]
     where
         T: Clone,
+        T: Copy,
         T: Default,
     {
-        if self.cached_buffers.len() > 0 {
-            self.cached_buffers.pop().unwrap()
-        } else {
-            vec![T::default(); self.segment_size]
-        }
+        return self
+            .cached_buffers
+            .pop()
+            .unwrap_or_else(|| [T::default(); SS]);
     }
 
-    pub fn release(&mut self, buffer: Vec<T>) -> bool {
+    pub fn release(&mut self, buffer: [T; SS]) -> Response {
         // we will add back the vector and validate if it matches the size
-        if buffer.len() == self.segment_size && self.cached_buffers.len() < self.max_array_count {
+        if self.cached_buffers.len() < PS {
             self.cached_buffers.push(buffer);
-            true
+            Response::Ok
         } else {
-            false
+            Response::PoolSaturated
         }
     }
 }
