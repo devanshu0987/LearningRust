@@ -22,22 +22,22 @@ fn new_fails_v2() {
 
 #[test]
 fn set_get_single_success() {
-    let mut b1 = SimpleBitVector::new(32, false);
-    assert!(b1.get(0) == false, "Index 0 is already set");
-    b1.set(0, true);
-    assert!(b1.get(0) == true, "Index 0 is not set");
+    let mut bv = SimpleBitVector::new(32, false);
+    assert!(bv.get(0) == false, "Index 0 is already set");
+    bv.set(0, true);
+    assert!(bv.get(0) == true, "Index 0 is not set");
 }
 
 #[test]
 fn set_get_multiple_success() {
-    let mut b1 = SimpleBitVector::new(32, false);
+    let mut bv = SimpleBitVector::new(32, false);
     for index in &[1u32..5] {
-        assert!(b1.get((*index).start) == false);
-        b1.set((*index).start, true);
+        assert!(bv.get((*index).start) == false);
+        bv.set((*index).start, true);
     }
 
     for index in &[1u32..5] {
-        assert!(b1.get((*index).start) == true);
+        assert!(bv.get((*index).start) == true);
     }
 }
 
