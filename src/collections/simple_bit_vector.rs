@@ -27,29 +27,65 @@ impl SimpleBitVector {
         }
     }
 
+    /// Tries to get value, if out of index, returns None
+    pub fn try_get(&self, index: u32) -> Option<bool> {
+        // index should be one less than len * 32
+        if index >= (self.slots.len() * 32).try_into().unwrap() {
+            return None;
+        }
+
+        return Some(self.get_internal(index));
+    }
+
+    /// Tries to get value, if out of index, panics.
     pub fn get(&self, index: u32) -> bool {
         // index should be one less than len * 32
-        assert!(index < (self.slots.len() * 32).try_into().unwrap(), "Invalid index");
+        assert!(
+            index < (self.slots.len() * 32).try_into().unwrap(),
+            "Invalid index"
+        );
 
+        self.get_internal(index)
+    }
+
+    /// infallible get. No index check if performed.
+    fn get_internal(&self, index: u32) -> bool {
         let slot_index: usize = (index / 32).try_into().unwrap();
         let inter_slot_index = index % 32;
         let slot_u32 = self.slots[slot_index];
 
-        // bit magic
+        // bit magic that I don't understand fully.
         slot_u32 & (1 << inter_slot_index) != 0
     }
 
     pub fn set(&mut self, index: u32, value: bool) {
-        assert!(index < (self.slots.len() * 32).try_into().unwrap(), "Invalid index");
+        assert!(
+            index < (self.slots.len() * 32).try_into().unwrap(),
+            "Invalid index"
+        );
 
+        self.set_internal(index, value);
+    }
+
+    pub fn try_set(&mut self, index: u32, value: bool) -> bool {
+        // index should be one less than len * 32
+        if index >= (self.slots.len() * 32).try_into().unwrap() {
+            return false;
+        }
+
+        self.set_internal(index, value);
+        true
+    }
+
+    /// infallible function
+    fn set_internal(&mut self, index: u32, value: bool) {
         let slot_index: usize = (index / 32).try_into().unwrap();
         let inter_slot_index = index % 32;
         let mut slot_u32 = self.slots[slot_index];
 
         if value {
             slot_u32 |= 1 << inter_slot_index;
-        }
-        else {
+        } else {
             slot_u32 &= !(1 << inter_slot_index);
         }
         self.slots[slot_index] = slot_u32;

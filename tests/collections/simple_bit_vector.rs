@@ -32,17 +32,25 @@ fn set_get_single_success() {
 fn set_get_multiple_success() {
     let mut bv = SimpleBitVector::new(32, false);
     for index in &[1u32..5] {
-        assert!(bv.get((*index).start) == false, "Index {} is already set", (*index).start);
+        assert!(
+            bv.get((*index).start) == false,
+            "Index {} is already set",
+            (*index).start
+        );
         bv.set((*index).start, true);
     }
 
     for index in &[1u32..5] {
-        assert!(bv.get((*index).start) == true, "Index {} is not set", (*index).start);
+        assert!(
+            bv.get((*index).start) == true,
+            "Index {} is not set",
+            (*index).start
+        );
     }
 }
 
 #[test]
-fn set_fails(){
+fn set_index_out_of_bounds_panics() {
     let result = std::panic::catch_unwind(|| {
         let mut bv = SimpleBitVector::new(32, false);
         bv.set(32, true);
@@ -51,10 +59,24 @@ fn set_fails(){
 }
 
 #[test]
-fn get_fails(){
+fn get_index_out_of_bounds_panics() {
     let result = std::panic::catch_unwind(|| {
         let bv = SimpleBitVector::new(32, false);
         bv.get(32);
     });
     assert!(result.is_err());
+}
+
+#[test]
+fn try_set_index_out_of_bounds() {
+    let mut bv = SimpleBitVector::new(32, false);
+
+    assert!(bv.try_set(32, true) == false);
+}
+
+#[test]
+fn try_get_index_out_of_bounds() {
+    let bv = SimpleBitVector::new(32, false);
+    let value = bv.try_get(32);
+    assert!(value.is_none());
 }
