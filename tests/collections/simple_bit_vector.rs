@@ -31,13 +31,30 @@ fn set_get_single_success() {
 #[test]
 fn set_get_multiple_success() {
     let mut b1 = SimpleBitVector::new(32, false);
-    let temp = vec![0,1,2,3,4];
-    for index in &temp {
-        assert!(b1.get(*index) == false);
-        b1.set(*index, true);
+    for index in &[1u32..5] {
+        assert!(b1.get((*index).start) == false);
+        b1.set((*index).start, true);
     }
 
-    for index in &temp {
-        assert!(b1.get(*index) == true);
+    for index in &[1u32..5] {
+        assert!(b1.get((*index).start) == true);
     }
+}
+
+#[test]
+fn set_fails(){
+    let result = std::panic::catch_unwind(|| {
+        let mut bv = SimpleBitVector::new(32, false);
+        bv.set(32, true);
+    });
+    assert!(result.is_err());
+}
+
+#[test]
+fn get_fails(){
+    let result = std::panic::catch_unwind(|| {
+        let bv = SimpleBitVector::new(32, false);
+        bv.get(32);
+    });
+    assert!(result.is_err());
 }
