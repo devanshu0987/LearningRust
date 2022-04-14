@@ -97,3 +97,32 @@ fn consumable_iterator() {
 
     // let value = bv.try_get(0);
 }
+
+#[test]
+fn non_consumable_iterator() {
+    let mut bv = SimpleBitVector::new(5, false);
+    let mut accumulated_result: Vec<bool> = Vec::new();
+    for item in &bv {
+        accumulated_result.push(item);
+    }
+    assert!(
+        accumulated_result == vec![false, false, false, false, false],
+        "Iterator didn't return valid result"
+    );
+
+    // when we try to access bv here, we can still access it.
+    // ACT
+    let _ = bv.try_get(0);
+    let _ = bv.try_set(0, true);
+
+    accumulated_result.clear();
+    for item in &bv {
+        accumulated_result.push(item);
+    }
+
+    // ASSERT
+    assert!(
+        accumulated_result == vec![true, false, false, false, false],
+        "Iterator didn't return valid result"
+    );
+}

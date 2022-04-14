@@ -8,11 +8,6 @@ pub struct SimpleBitVector {
     pub allocated_length: u32,
 }
 
-pub struct SimpleBitVectorConsumableIterator {
-    vector: SimpleBitVector,
-    index: u32,
-}
-
 impl SimpleBitVector {
     /// Creates a new instance of SimpleBitVector
     /// length - 1 ints will be indexed
@@ -93,6 +88,28 @@ impl SimpleBitVector {
     }
 }
 
+pub struct SimpleBitVectorConsumableIterator {
+    vector: SimpleBitVector,
+    index: u32,
+}
+
+pub struct SimpleBitVectorNonConsumableIterator<'a> {
+    vector: &'a SimpleBitVector,
+    index: u32,
+}
+
+impl<'a> IntoIterator for &'a SimpleBitVector {
+    type Item = bool;
+    type IntoIter = SimpleBitVectorNonConsumableIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        SimpleBitVectorNonConsumableIterator {
+            vector: self,
+            index: 0,
+        }
+    }
+}
+
 impl IntoIterator for SimpleBitVector {
     type Item = bool;
     type IntoIter = SimpleBitVectorConsumableIterator;
@@ -106,6 +123,19 @@ impl IntoIterator for SimpleBitVector {
 }
 
 impl Iterator for SimpleBitVectorConsumableIterator {
+    type Item = bool;
+    fn next(&mut self) -> Option<bool> {
+        if self.index < self.vector.length {
+            let result = self.vector.get_internal(self.index);
+            self.index += 1;
+            Some(result)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Iterator for SimpleBitVectorNonConsumableIterator<'a> {
     type Item = bool;
     fn next(&mut self) -> Option<bool> {
         if self.index < self.vector.length {
