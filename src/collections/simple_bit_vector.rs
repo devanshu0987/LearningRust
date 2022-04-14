@@ -9,7 +9,7 @@ pub struct SimpleBitVector {
 
 impl SimpleBitVector {
     /// Creates a new instance of SimpleBitVector
-    /// length denotes
+    /// length - 1 ints will be indexed
     pub fn new(length: u32, default_value: bool) -> Self {
         assert!(length > 0, "Wrong argument: Length cannot be zero");
         let slots_required: usize = ((length + 31) / 32).try_into().unwrap();
@@ -25,5 +25,33 @@ impl SimpleBitVector {
             slots: vec![internal_default_value; slots_required],
             length: slots_required,
         }
+    }
+
+    pub fn get(&self, index: u32) -> bool {
+        // index should be one less than len * 32
+        assert!(index < (self.slots.len() * 32).try_into().unwrap(), "Invalid index");
+
+        let slot_index: usize = (index / 32).try_into().unwrap();
+        let inter_slot_index = index % 32;
+        let slot_u32 = self.slots[slot_index];
+
+        // bit magic
+        slot_u32 & (1 << inter_slot_index) != 0
+    }
+
+    pub fn set(&mut self, index: u32, value: bool) {
+        assert!(index < (self.slots.len() * 32).try_into().unwrap(), "Invalid index");
+
+        let slot_index: usize = (index / 32).try_into().unwrap();
+        let inter_slot_index = index % 32;
+        let mut slot_u32 = self.slots[slot_index];
+
+        if value {
+            slot_u32 |= 1 << inter_slot_index;
+        }
+        else {
+            slot_u32 &= !(1 << inter_slot_index);
+        }
+        self.slots[slot_index] = slot_u32;
     }
 }

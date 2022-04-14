@@ -19,3 +19,25 @@ fn new_fails_v2() {
     });
     assert!(result.is_err());
 }
+
+#[test]
+fn set_get_single_success() {
+    let mut b1 = SimpleBitVector::new(32, false);
+    assert!(b1.get(0) == false, "Index 0 is already set");
+    b1.set(0, true);
+    assert!(b1.get(0) == true, "Index 0 is not set");
+}
+
+#[test]
+fn set_get_multiple_success() {
+    let mut b1 = SimpleBitVector::new(32, false);
+    let temp = vec![0,1,2,3,4];
+    for index in &temp {
+        assert!(b1.get(*index) == false);
+        b1.set(*index, true);
+    }
+
+    for index in &temp {
+        assert!(b1.get(*index) == true);
+    }
+}
