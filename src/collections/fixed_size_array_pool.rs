@@ -11,6 +11,7 @@ impl<T, const SS: usize, const PS: usize> FixedSizeArrayPool<T, SS, PS> {
     pub fn len(&self) -> usize {
         self.cached_buffers.len()
     }
+
     pub fn new() -> FixedSizeArrayPool<T, SS, PS>
     where
         T: Clone,
