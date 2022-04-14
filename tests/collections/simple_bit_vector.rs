@@ -1,9 +1,9 @@
 use common::collections::simple_bit_vector::SimpleBitVector;
 #[test]
 fn new_works() {
-    assert!(SimpleBitVector::new(32, false).length == 1);
-    assert!(SimpleBitVector::new(31, true).length == 1);
-    assert!(SimpleBitVector::new(1, true).length == 1);
+    assert!(SimpleBitVector::new(32, false).allocated_length == 1);
+    assert!(SimpleBitVector::new(31, true).allocated_length == 1);
+    assert!(SimpleBitVector::new(1, true).allocated_length == 1);
 }
 
 #[test]
@@ -79,4 +79,21 @@ fn try_get_index_out_of_bounds() {
     let bv = SimpleBitVector::new(32, false);
     let value = bv.try_get(32);
     assert!(value.is_none());
+}
+
+#[test]
+fn consumable_iterator() {
+    let bv = SimpleBitVector::new(5, false);
+    let mut accumulated_result: Vec<bool> = Vec::new();
+    for item in bv {
+        accumulated_result.push(item);
+    }
+    assert!(
+        accumulated_result == vec![false, false, false, false, false],
+        "Iterator didn't return valid result"
+    );
+
+    // when we try to access bv here, we get error that the value has already moved.
+
+    // let value = bv.try_get(0);
 }

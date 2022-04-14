@@ -4,7 +4,13 @@
 pub struct SimpleBitVector {
     /// Stores u32 each representing 32 bits where we can set bits.
     slots: Vec<u32>,
-    pub length: usize,
+    pub length: u32,
+    pub allocated_length: u32,
+}
+
+pub struct SimpleBitVectorConsumableIterator {
+    vector: SimpleBitVector,
+    index: u32,
 }
 
 impl SimpleBitVector {
@@ -12,7 +18,7 @@ impl SimpleBitVector {
     /// length - 1 ints will be indexed
     pub fn new(length: u32, default_value: bool) -> Self {
         assert!(length > 0, "Wrong argument: Length cannot be zero");
-        let slots_required: usize = ((length + 31) / 32).try_into().unwrap();
+        let slots_required: u32 = ((length + 31) / 32).try_into().unwrap();
         // if default_value is set to true, it means all bits are set
         // hence each slot should hold the max which is 11111...
         // if false, then we set to 0
@@ -22,28 +28,26 @@ impl SimpleBitVector {
         };
 
         SimpleBitVector {
-            slots: vec![internal_default_value; slots_required],
-            length: slots_required,
+            slots: vec![internal_default_value; slots_required.try_into().unwrap()],
+            length: length,
+            allocated_length: slots_required,
         }
     }
 
     /// Tries to get value, if out of index, returns None
     pub fn try_get(&self, index: u32) -> Option<bool> {
         // index should be one less than len * 32
-        if index >= (self.slots.len() * 32).try_into().unwrap() {
-            return None;
+        if index >= self.length {
+            None
+        } else {
+            Some(self.get_internal(index))
         }
-
-        return Some(self.get_internal(index));
     }
 
     /// Tries to get value, if out of index, panics.
     pub fn get(&self, index: u32) -> bool {
         // index should be one less than len * 32
-        assert!(
-            index < (self.slots.len() * 32).try_into().unwrap(),
-            "Invalid index"
-        );
+        assert!(index < self.length, "Invalid index");
 
         self.get_internal(index)
     }
@@ -59,22 +63,19 @@ impl SimpleBitVector {
     }
 
     pub fn set(&mut self, index: u32, value: bool) {
-        assert!(
-            index < (self.slots.len() * 32).try_into().unwrap(),
-            "Invalid index"
-        );
+        assert!(index < self.length, "Invalid index");
 
         self.set_internal(index, value);
     }
 
     pub fn try_set(&mut self, index: u32, value: bool) -> bool {
         // index should be one less than len * 32
-        if index >= (self.slots.len() * 32).try_into().unwrap() {
-            return false;
+        if index >= self.length {
+            false
+        } else {
+            self.set_internal(index, value);
+            true
         }
-
-        self.set_internal(index, value);
-        true
     }
 
     /// infallible function
@@ -89,5 +90,30 @@ impl SimpleBitVector {
             slot_u32 &= !(1 << inter_slot_index);
         }
         self.slots[slot_index] = slot_u32;
+    }
+}
+
+impl IntoIterator for SimpleBitVector {
+    type Item = bool;
+    type IntoIter = SimpleBitVectorConsumableIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        SimpleBitVectorConsumableIterator {
+            vector: self,
+            index: 0,
+        }
+    }
+}
+
+impl Iterator for SimpleBitVectorConsumableIterator {
+    type Item = bool;
+    fn next(&mut self) -> Option<bool> {
+        if self.index < self.vector.length {
+            let result = self.vector.get_internal(self.index);
+            self.index += 1;
+            Some(result)
+        } else {
+            None
+        }
     }
 }
