@@ -32,12 +32,12 @@ fn set_get_single_success() {
 fn set_get_multiple_success() {
     let mut bv = SimpleBitVector::new(32, false);
     for index in &[1u32..5] {
-        assert!(bv.get((*index).start) == false);
+        assert!(bv.get((*index).start) == false, "Index {} is already set", (*index).start);
         bv.set((*index).start, true);
     }
 
     for index in &[1u32..5] {
-        assert!(bv.get((*index).start) == true);
+        assert!(bv.get((*index).start) == true, "Index {} is not set", (*index).start);
     }
 }
 
