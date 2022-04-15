@@ -1,3 +1,5 @@
+/// Maintains pool of fixed size arrays
+/// FixedSizeArrayPool<Type, SegmentSize: usize, PoolSize: usize>
 pub struct FixedSizeArrayPool<T, const SS: usize, const PS: usize> {
     cached_buffers: Vec<[T; SS]>,
 }

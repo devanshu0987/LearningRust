@@ -44,3 +44,17 @@ fn it_works_v2() {
         _ => assert!(false),
     }
 }
+
+#[test]
+fn exhaust_acquire() {
+    let mut pool = FixedSizeArrayPool::<u8, 5, 2>::new();
+    let _ = pool.acquire();
+    let _ = pool.acquire();
+    assert_eq!(pool.len(), 0, "Pool is not empty");
+    let _ = pool.acquire();
+    assert_eq!(
+        pool.len(),
+        0,
+        "Pool was empty but we still got an element above"
+    );
+}
