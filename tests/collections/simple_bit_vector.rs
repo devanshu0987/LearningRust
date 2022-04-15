@@ -26,6 +26,8 @@ fn set_get_single_success() {
     assert!(bv.get(0) == false, "Index 0 is already set");
     bv.set(0, true);
     assert!(bv.get(0) == true, "Index 0 is not set");
+    bv.set(0, false);
+    assert!(bv.get(0) == false, "Index 0 is set");
 }
 
 #[test]
