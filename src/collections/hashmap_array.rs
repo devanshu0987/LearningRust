@@ -21,7 +21,7 @@ where
         partition_count = max(partition_count, 16);
         partition_count = min(partition_count, 256);
         let mut container = Vec::with_capacity(partition_count);
-        for _ in [0..16] {
+        for _ in [0..partition_count] {
             container.push(HashMap::<TKey, TValue>::new());
         }
         HashmapArray {
